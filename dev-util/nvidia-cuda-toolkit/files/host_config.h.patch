@@ -1,0 +1,11 @@
+--- a/builds/cuda_nvcc/targets/x86_64-linux/include/crt/host_config.h
++++ b/builds/cuda_nvcc/targets/x86_64-linux/include/crt/host_config.h
+@@ -133,7 +133,7 @@
+ 
+ #if defined(__GNUC__)
+ 
+-#if __GNUC__ > 9
++#if __GNUC__ > 10
+ 
+ #error -- unsupported GNU version! gcc versions later than 9 are not supported!
+ 

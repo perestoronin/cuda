@@ -1,0 +1,31 @@
+--- a/makefiles/common.mk
++++ b/makefiles/common.mk
+@@ -25,9 +25,7 @@
+ 
+ # You should define NVCC_GENCODE in your environment to the minimal set
+ # of archs to reduce compile time.
+-CUDA8_GENCODE = -gencode=arch=compute_35,code=sm_35 \
+-                -gencode=arch=compute_50,code=sm_50 \
+-                -gencode=arch=compute_60,code=sm_60 \
++CUDA8_GENCODE = -gencode=arch=compute_60,code=sm_60 \
+                 -gencode=arch=compute_61,code=sm_61
+ CUDA9_GENCODE = -gencode=arch=compute_70,code=sm_70
+ CUDA11_GENCODE = -gencode=arch=compute_80,code=sm_80
+@@ -48,7 +46,7 @@
+ #$(info NVCC_GENCODE is ${NVCC_GENCODE})
+ 
+ CXXFLAGS   := -DCUDA_MAJOR=$(CUDA_MAJOR) -DCUDA_MINOR=$(CUDA_MINOR) -fPIC -fvisibility=hidden \
+-              -Wall -Wno-unused-function -Wno-sign-compare -std=c++11 -Wvla \
++              -Wall -Wno-unused-function -Wno-sign-compare -Wno-format-overflow -Wno-format-truncation -std=c++11 -Wvla \
+               -I $(CUDA_INC) \
+               $(CXXFLAGS)
+ # Maxrregcount needs to be set accordingly to NCCL_MAX_NTHREADS (otherwise it will cause kernel launch errors)
+@@ -78,7 +76,7 @@
+ 
+ ifneq ($(VERBOSE), 0)
+ NVCUFLAGS += -Xptxas -v -Xcompiler -Wall,-Wextra,-Wno-unused-parameter
+-CXXFLAGS  += -Wall -Wextra
++CXXFLAGS  += -Wall -Wextra -Wno-format-overflow -Wno-format-truncation
+ else
+ .SILENT:
+ endif
