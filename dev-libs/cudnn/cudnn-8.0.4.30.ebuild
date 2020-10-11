@@ -1,13 +1,11 @@
 EAPI=7
 
-CUDA_PV=11.0
-
+CUDA_PV=11.1
 DESCRIPTION="NVIDIA Accelerated Deep Learning on GPU library"
 HOMEPAGE="https://developer.nvidia.com/cuDNN"
 
 SRC_URI="cudnn-${CUDA_PV}-linux-x64-v${PV}.tgz"
-# https://developer.nvidia.com/compute/machine-learning/cudnn/secure/8.0.2.39/11.0_20200724/cudnn-11.0-linux-x64-v8.0.2.39.tgz
-
+# https://developer.nvidia.com/compute/machine-learning/cudnn/secure/8.0.4/11.1_20200923/cudnn-11.1-linux-x64-v8.0.4.30.tgz
 
 SLOT="0/8"
 KEYWORDS="amd64"
