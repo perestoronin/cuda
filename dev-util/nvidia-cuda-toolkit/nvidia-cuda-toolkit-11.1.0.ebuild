@@ -10,7 +10,7 @@ DRIVER_PV="455.23.05"
 
 DESCRIPTION="NVIDIA CUDA Toolkit (compiler and friends)"
 HOMEPAGE="https://developer.nvidia.com/cuda-zone"
-SRC_URI="http://developer.download.nvidia.com/compute/cuda/${PV}/local_installers/cuda_${PV}_${DRIVER_PV}_linux.run"
+SRC_URI="https://developer.download.nvidia.com/compute/cuda/${PV}/local_installers/cuda_${PV}_${DRIVER_PV}_linux.run"
 ###	http://developer.download.nvidia.com/compute/cuda/${PV}/local_installers/cuda_${PV_DOC}_${DRIVER_PV_DOC}_linux.run
 LICENSE="NVIDIA-CUDA"
 SLOT="0/${PV}"
