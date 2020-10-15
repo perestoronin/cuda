@@ -74,7 +74,7 @@ PATCHES=(
 	"${FILESDIR}"/${PV}/${PN}-locale.patch
 #	"${FILESDIR}"/${PV}/kernel-5.7.patch
 )
-NV_KV_MAX_PLUS="5.9"
+NV_KV_MAX_PLUS="5.10"
 CONFIG_CHECK="
 	!DEBUG_MUTEXES
 	~!I2C_NVIDIA_GPU
