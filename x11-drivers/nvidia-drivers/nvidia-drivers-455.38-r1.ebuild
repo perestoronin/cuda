@@ -32,7 +32,7 @@ COMMON="
 		dev-libs/jansson
 		x11-libs/gtk+:3
 		x11-libs/cairo
-		x11-libs/gdk-pixbuf[X]
+		x11-libs/gdk-pixbuf
 		x11-libs/libX11
 		x11-libs/libXext
 		x11-libs/libXrandr
@@ -41,12 +41,11 @@ COMMON="
 		x11-libs/pango[X]
 	)
 	X? (
-		!libglvnd? ( >=app-eselect/eselect-opengl-1.0.9 )
+		>=x11-libs/libvdpau-1.0
+		app-misc/pax-utils
 		libglvnd? (
 			media-libs/libglvnd
-			!app-eselect/eselect-opengl
 		)
-		app-misc/pax-utils
 	)
 "
 DEPEND="
@@ -56,14 +55,12 @@ DEPEND="
 "
 RDEPEND="
 	${COMMON}
-	tools? ( !media-video/nvidia-settings )
 	uvm? ( >=virtual/opencl-3 )
 	wayland? ( dev-libs/wayland )
 	X? (
 		<x11-base/xorg-server-1.20.99:=
 		>=x11-libs/libX11-1.6.2
 		>=x11-libs/libXext-1.3.2
-		>=x11-libs/libvdpau-1.0
 		sys-libs/zlib
 	)
 	kernel_linux? ( net-libs/libtirpc )
@@ -465,11 +462,6 @@ pkg_preinst() {
 
 pkg_postinst() {
 	use driver && linux-mod_pkg_postinst
-
-	# Switch to the nvidia implementation
-	if ! use libglvnd; then
-		use X && "${ROOT}"/usr/bin/eselect opengl set --use-old nvidia
-	fi
 
 	readme.gentoo_print_elog
 

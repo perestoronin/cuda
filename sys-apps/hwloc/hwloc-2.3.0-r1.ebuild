@@ -1,6 +1,6 @@
 EAPI=7
 
-inherit autotools cuda flag-o-matic systemd toolchain-funcs multilib-minimal
+inherit autotools bash-completion-r1 cuda flag-o-matic systemd toolchain-funcs multilib-minimal
 
 MY_PV="v$(ver_cut 1-2)"
 
@@ -10,27 +10,32 @@ SRC_URI="https://www.open-mpi.org/software/${PN}/${MY_PV}/downloads/${P}.tar.bz2
 
 LICENSE="BSD"
 SLOT="0/15"
-KEYWORDS="amd64"
-IUSE="cairo +cpuid cuda debug gl libudev netloc nvml +pci plugins static-libs svg xml X"
+KEYWORDS="amd64 arm64"
+IUSE="cairo +cpuid opencl rocm cuda debug gl libudev netloc nvml +pci plugins static-libs svg xml X"
 
 # opencl support dropped with x11-drivers/ati-drivers being removed (#582406).
 # Anyone with hardware is welcome to step up and help test to get it re-added.
 
 RDEPEND=">=sys-libs/ncurses-5.9-r3:0[${MULTILIB_USEDEP}]
-
 	cairo?		( >=x11-libs/cairo-1.12.14-r4[X?,svg?,${MULTILIB_USEDEP}] )
-	cuda?		( >=dev-util/nvidia-cuda-toolkit-10.2.89:= )
+	cuda?		( >=dev-util/nvidia-cuda-toolkit-11.1.0:= )
+	rocm?		( dev-util/rocm-smi )
 	gl?		( x11-drivers/nvidia-drivers[tools] )
 	libudev?	( virtual/libudev )
 	netloc?		( !sys-apps/netloc )
+	nvml?		( x11-drivers/nvidia-drivers[${MULTILIB_USEDEP}] )
 	pci?		(
 				>=sys-apps/pciutils-3.3.0-r2[${MULTILIB_USEDEP}]
 				>=x11-libs/libpciaccess-0.13.1-r1[${MULTILIB_USEDEP}]
 			)
 	plugins?	( dev-libs/libltdl:0[${MULTILIB_USEDEP}] )
 	xml?		( >=dev-libs/libxml2-2.9.1-r4[${MULTILIB_USEDEP}] )"
-DEPEND="${RDEPEND}
-	>=virtual/pkgconfig-0-r1[${MULTILIB_USEDEP}]"
+DEPEND="${RDEPEND}"
+
+BDEPEND="
+	>=sys-devel/autoconf-2.69-r5
+	virtual/pkgconfig
+"
 
 PATCHES=( "${FILESDIR}/${P}-gl.patch" )
 DOCS=( AUTHORS NEWS README VERSION )
@@ -54,10 +59,12 @@ multilib_src_configure() {
 	fi
 
 	local myconf=(
-		--disable-opencl
 		--enable-shared
+		--runstatedir="${EPREFIX}/run"
 		$(multilib_native_use_enable cuda)
 		$(multilib_native_use_enable gl)
+		$(use_enable opencl)
+		$(use_enable rocm rsmi)
 		$(use_enable cairo)
 		$(use_enable cpuid)
 		$(use_enable debug)
@@ -75,6 +82,14 @@ multilib_src_configure() {
 
 multilib_src_install_all() {
 	default
-	systemd_dounit "${ED}/usr/share/hwloc/hwloc-dump-hwdata.service"
+	case ${ARCH} in
+	# hwloc-dump-hwdata binary only built on those arches, so don't install non-working unit.
+		amd64|x86)
+			systemd_dounit "${ED}/usr/share/hwloc/hwloc-dump-hwdata.service" ;;
+	esac
+	mv "${ED}"/usr/share/bash-completion/completions/hwloc{,-annotate} || die
+	bashcomp_alias hwloc-annotate \
+		hwloc-{diff,ps,compress-dir,gather-cpuid,distrib,info,bind,patch,calc,ls,gather-topology}
+	bashcomp_alias hwloc-annotate lstopo{,-no-graphics}
 	find "${ED}" -name '*.la' -delete || die
 }
