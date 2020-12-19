@@ -2,7 +2,7 @@ EAPI=7
 
 inherit cuda flag-o-matic portability toolchain-funcs unpacker
 
-DRIVER_PV="455.23.05"
+DRIVER_PV="460.27.04"
 
 DESCRIPTION="NVIDIA CUDA Software Development Kit"
 HOMEPAGE="https://developer.nvidia.com/cuda-zone"

@@ -2,7 +2,7 @@ EAPI=7
 
 inherit cuda
 
-CUDA_PV=11.0
+CUDA_PV=11.1
 
 DESCRIPTION="Library for NVIDIA multi-GPU and multi-node collective communication primitives"
 HOMEPAGE="https://developer.nvidia.com/nccl/"
@@ -17,7 +17,7 @@ LICENSE="BSD"
 DEPEND=">=dev-util/nvidia-cuda-toolkit-${CUDA_PV}"
 RDEPEND="${DEPEND}"
 
-PATCHES=( "${FILESDIR}"/common.mk-${MY_PV}.patch )
+PATCHES=( "${FILESDIR}/common.mk.patch" )
 
 S="${WORKDIR}/${PN}-${MY_PV}"
 

@@ -44,7 +44,7 @@ COMMON="
 		>=x11-libs/libvdpau-1.0
 		app-misc/pax-utils
 		libglvnd? (
-			media-libs/libglvnd
+			media-libs/libglvnd[X]
 		)
 	)
 "
@@ -69,6 +69,7 @@ QA_PREBUILT="opt/* usr/lib*"
 S=${WORKDIR}/
 PATCHES=(
 	"${FILESDIR}"/${PV}/${PN}-locale.patch
+#	"${FILESDIR}"/${PV}/${PN}-reduce-kmalloc-limit.patch
 #	"${FILESDIR}"/${PV}/kernel-5.7.patch
 )
 NV_KV_MAX_PLUS="5.10"
@@ -359,7 +360,7 @@ src_install() {
 
 	readme.gentoo_create_doc
 
-	dodoc supported-gpus.json
+	dodoc supported-gpus/supported-gpus.json
 
 	docinto html
 	dodoc -r ${NV_DOC}/html/*
@@ -483,15 +484,6 @@ pkg_postinst() {
 	fi
 }
 
-pkg_prerm() {
-	if ! use libglvnd; then
-		use X && "${ROOT}"/usr/bin/eselect opengl set --use-old xorg-x11
-	fi
-}
-
 pkg_postrm() {
 	use driver && linux-mod_pkg_postrm
-	if ! use libglvnd; then
-		use X && "${ROOT}"/usr/bin/eselect opengl set --use-old xorg-x11
-	fi
 }

@@ -2,26 +2,21 @@ EAPI=7
 
 inherit check-reqs cuda toolchain-funcs unpacker
 
-MYD=$(ver_cut 1-2 ${PV})
-DRIVER_PV="455.23.05"
-
-### PV_DOC="11.0.3"
-### DRIVER_PV_DOC="450.51.06"
+DRIVER_PV="460.27.04"
 
 DESCRIPTION="NVIDIA CUDA Toolkit (compiler and friends)"
 HOMEPAGE="https://developer.nvidia.com/cuda-zone"
 SRC_URI="https://developer.download.nvidia.com/compute/cuda/${PV}/local_installers/cuda_${PV}_${DRIVER_PV}_linux.run"
-###	http://developer.download.nvidia.com/compute/cuda/${PV}/local_installers/cuda_${PV_DOC}_${DRIVER_PV_DOC}_linux.run
 LICENSE="NVIDIA-CUDA"
 SLOT="0/${PV}"
 KEYWORDS="amd64"
-IUSE="debugger doc eclipse profiler"
+IUSE="debugger doc eclipse profiler vis-profiler"
 RESTRICT="bindist mirror"
 
 BDEPEND=""
 RDEPEND="
 	>=sys-devel/gcc-10.2.0[cxx]
-	>=x11-drivers/nvidia-drivers-$(ver_cut 1-2 ${DRIVER_PV})[X,uvm]
+	>=x11-drivers/nvidia-drivers-${DRIVER_PV}[X,uvm]
 	debugger? (
 		dev-libs/openssl
 		sys-libs/libtermcap
@@ -35,8 +30,6 @@ RDEPEND="
 		dev-libs/openssl
 		>=virtual/jre-1.8
 	)"
-
-# PATCHES=( "${FILESDIR}/host_config.h.patch" )
 
 S="${WORKDIR}"
 
@@ -133,39 +126,41 @@ src_install() {
 
 # 	die TODO !!!
 
-	cat > "${T}"/99cuda <<- EOF || die
-		PATH=${ecudadir}/bin$(usex profiler ":${ecudadir}/libnvvp" "")
-		ROOTPATH=${ecudadir}/bin
-		LDPATH=${ecudadir}/lib64:${ecudadir}/lib:${ecudadir}/nvvm/lib64
-	EOF
-	doenvd "${T}"/99cuda
+	# Add include and lib symlinks
+	dosym "targets/x86_64-linux/include" ${cudadir}/include
+	dosym "targets/x86_64-linux/lib" ${cudadir}/lib64
 
-	#Cuda prepackages libraries, don't revdep-build on them
-	echo "SEARCH_DIRS_MASK=\"${ecudadir}\"" > "${T}/80${PN}" || die
-	insinto "/etc/revdep-rebuild"
-	doins "${T}/80${PN}"
+	newenvd - 99cuda <<-EOF
+		PATH=${ecudadir}/bin$(usex vis-profiler ":${ecudadir}/libnvvp" "")
+		ROOTPATH=${ecudadir}/bin
+		LDPATH=${ecudadir}/lib64:${ecudadir}/nvvm/lib64$(usex profiler ":${ecudadir}/extras/CUPTI/lib64" "")
+	EOF
+
+	# Cuda prepackages libraries, don't revdep-build on them
+	insinto /etc/revdep-rebuild
+	newins - 80${PN} <<-EOF
+		SEARCH_DIRS_MASK="${ecudadir}"
+	EOF
 }
 
 pkg_postinst_check() {
-	local a b
-	a="$(${EROOT}/opt/cuda/bin/cuda-config -s)"
-	b="0.0"
-	for v in $a; do
-		if ver_test "${v}" -gt "${b}"; then
-			b="${v}"
-		fi
+	local a="$(${EROOT}/opt/cuda/bin/cuda-config -s)"
+	local b="0.0"
+	local v
+	for v in ${a}; do
+		ver_test "${v}" -gt "${b}" && b="${v}"
 	done
 
 	# if gcc and if not gcc-version is at least greatest supported
 	if tc-is-gcc && \
-		ver_test $(gcc-version) -gt ${b}; then
-			ewarn ""
+		ver_test $(gcc-version) -gt "${b}"; then
+			ewarn
 			ewarn "gcc > ${b} will not work with CUDA"
 			ewarn "Make sure you set an earlier version of gcc with gcc-config"
 			ewarn "or append --compiler-bindir= pointing to a gcc bindir like"
 			ewarn "--compiler-bindir=${EPREFIX}/usr/*pc-linux-gnu/gcc-bin/gcc${b}"
 			ewarn "to the nvcc compiler flags"
-			ewarn ""
+			ewarn
 	fi
 }
 
