@@ -118,6 +118,9 @@ src_prepare() {
 			nvidia-settings-${PV}/src/Makefile || die
 	fi
 
+	sed -i -e 's|PREEMPT_RT_PRESENT=1|PREEMPT_RT_PRESENT=0|g' kernel/conftest.sh || die
+	export IGNORE_CC_MISMATCH=1
+
 	default
 
 	if ! [[ -f nvidia_icd.json ]]; then
